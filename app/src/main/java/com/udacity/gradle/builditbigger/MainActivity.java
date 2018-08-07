@@ -1,5 +1,6 @@
 package com.udacity.gradle.builditbigger;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -7,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.himebaugh.androidlibrary.DisplayJokeActivity;
 import com.himebaugh.javalibrary.JokeWizard;
 
 
@@ -41,12 +43,27 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    // Add a button to the main activity that retrieves a joke from the Java
+    // library, packages the joke as an intent extra, and launches the activity from
+    // the Android library.
+
+    // Button in fragment_main.xml onClick calls tellJoke() method below...
+
+    // There we go! Now we can launch the activity from our library, and it's
+    // easy to reuse that activity between different apps!
+
     public void tellJoke(View view) {
 
+        // retrieves a joke from the Java library
         JokeWizard myJokeWizard = new JokeWizard();
         String wizardJoke = myJokeWizard.getJoke();
-        Toast.makeText(this, wizardJoke, Toast.LENGTH_SHORT).show();
-    }
 
+        Intent intent = new Intent(getBaseContext(), DisplayJokeActivity.class);
+        // packages the joke as an intent extra
+        intent.putExtra(DisplayJokeActivity.EXTRA_JOKE_STRING, wizardJoke);
+        // launches the activity from the Android library
+        startActivity(intent);
+    }
 
 }
