@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,8 @@ import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    private final static String TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
     public void tellJoke(View view) {
 
         // retrieves a joke from the Java library
-        JokeWizard myJokeWizard = new JokeWizard();
-        String wizardJoke = myJokeWizard.getJoke();
+//        JokeWizard myJokeWizard = new JokeWizard();
+//        String wizardJoke = myJokeWizard.getJoke();
 
 //        Intent intent = new Intent(getBaseContext(), DisplayJokeActivity.class);
 //        // packages the joke as an intent extra
@@ -75,15 +78,15 @@ public class MainActivity extends AppCompatActivity {
 //        // launches the activity from the Android library
 //        startActivity(intent);
 
-        new EndpointsAsyncTask().execute(new Pair<Context, String>(this, "Manfred"));
+        new EndpointsAsyncTask().execute(getBaseContext());
     }
 
-    class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
+    class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
         private MyApi myApiService = null;
         private Context context;
 
         @Override
-        protected String doInBackground(Pair<Context, String>... params) {
+        protected String doInBackground(Context... params) {
             if(myApiService == null) {  // Only do this once
                 MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(), null)
@@ -91,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
                         // - 10.0.2.2 is localhost's IP address in Android emulator
                         // - turn off compression when running against local devappserver
                         .setRootUrl("http://10.0.2.2:8080/_ah/api/")
+                        // http://localhost:8080/
+                        // 2.1.1. Testing device registration on a physical device
+                        //.setRootUrl("http://<my-computer-address>:8080/_ah/api/")
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
                             public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -99,14 +105,34 @@ public class MainActivity extends AppCompatActivity {
                         });
                 // end options for devappserver
 
+                // 2.3. Testing against a deployed backend
+
+                // REPLACE...
+
+//                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
+//                        .setRootUrl("http://10.0.2.2:8080/_ah/api/") // 10.0.2.2 is localhost's IP address in Android emulator
+//                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+//                            @Override
+//                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+//                                abstractGoogleClientRequest.setDisableGZipContent(true);
+//                            }
+//                        });
+
+                // WITH THIS....
+
+//                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
+//                        .setRootUrl("https://android-app-backend.appspot.com/_ah/api/");
+
+                // where android-app-backend corresponds to your own Project ID created in section 2.2.
+
                 myApiService = builder.build();
             }
 
-            context = params[0].first;
-            String name = params[0].second;
+            context = params[0];
+            //String name = params[0].second;
 
             try {
-                return myApiService.sayHi(name).execute().getData();
+                return myApiService.retrieveJoke().execute().getData();
             } catch (IOException e) {
                 return e.getMessage();
             }
@@ -114,6 +140,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
+
+            Log.i(TAG, "onPostExecute: " + result);
+
             Toast.makeText(context, result, Toast.LENGTH_LONG).show();
         }
     }
