@@ -22,8 +22,23 @@ import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
 
 import java.io.IOException;
 
+// TODO: Step 4: Add Functional Tests
+// Project contains connected tests to verify that the AsyncTask is indeed loading jokes.
+// Add code to test that your Async task successfully retrieves a non-empty string. For a refresher on setting up Android tests, check out demo 4.09.
 
-public class MainActivity extends AppCompatActivity {
+// All you need to do is to implement an Espresso Idling Resources test in order to verify that the AsyncTask is loading jokes.
+// To answer your question, I've seen many projects succeed in what you are doing. They use a CountDown Latch (since Espresso Idling Resources are made for connected Android Tests) and implement a callback to notify the unit test when the call has been made, or they simply use code similar to :new myAsyncTask().execute().get(); which just will halt until the async task is finished. You can probably argue for a long while which test is "better" but they both work and they both get the job done for this use case.
+// I apologize, Max G. is correct when he says that connected tests are required.
+// Sounds good. Thanks for the info. I actually had used the CountDownLatch method to do my test, so maybe I'll have to change it up to use IdlingResources instead. I could get the test to run with CountdownLatch if the emulator was running, but it just would hang if in a regular JUnit test. Thanks for the feedback
+
+
+// TODO: Step 5: Add a Paid Flavor
+// Project contains paid/free flavors. The paid flavor has no ads and no unnecessary dependencies.
+// Add free and paid product flavors to your app. Remove the ad (and any dependencies you can) from the paid flavor.
+
+// TODO: Ads are required in the free version.
+
+public class MainActivity extends AppCompatActivity implements EndpointsAsyncTask.EndpointsAsyncTaskListener {
 
     private final static String TAG = MainActivity.class.getName();
 
@@ -68,82 +83,24 @@ public class MainActivity extends AppCompatActivity {
 
     public void tellJoke(View view) {
 
-        // retrieves a joke from the Java library
-//        JokeWizard myJokeWizard = new JokeWizard();
-//        String wizardJoke = myJokeWizard.getJoke();
+        // Make the button kick off a task to retrieve a joke,
+        // then launch the activity from your Android Library to display it.
 
-//        Intent intent = new Intent(getBaseContext(), DisplayJokeActivity.class);
-//        // packages the joke as an intent extra
-//        intent.putExtra(DisplayJokeActivity.EXTRA_JOKE_STRING, wizardJoke);
-//        // launches the activity from the Android library
-//        startActivity(intent);
+        Log.i(TAG, "tellJoke: ");
 
-        new EndpointsAsyncTask().execute(getBaseContext());
+        new EndpointsAsyncTask(this).execute();
     }
 
-    class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
-        private MyApi myApiService = null;
-        private Context context;
+    @Override
+    public void onJokeReceived(String jokeString) {
 
-        @Override
-        protected String doInBackground(Context... params) {
-            if(myApiService == null) {  // Only do this once
-                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
-                        new AndroidJsonFactory(), null)
-                        // options for running against local devappserver
-                        // - 10.0.2.2 is localhost's IP address in Android emulator
-                        // - turn off compression when running against local devappserver
-                        .setRootUrl("http://10.0.2.2:8080/_ah/api/")
-                        // http://localhost:8080/
-                        // 2.1.1. Testing device registration on a physical device
-                        //.setRootUrl("http://<my-computer-address>:8080/_ah/api/")
-                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
-                            @Override
-                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
-                                abstractGoogleClientRequest.setDisableGZipContent(true);
-                            }
-                        });
-                // end options for devappserver
+        Log.i(TAG, "onJokeReceived: ");
 
-                // 2.3. Testing against a deployed backend
-
-                // REPLACE...
-
-//                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
-//                        .setRootUrl("http://10.0.2.2:8080/_ah/api/") // 10.0.2.2 is localhost's IP address in Android emulator
-//                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
-//                            @Override
-//                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
-//                                abstractGoogleClientRequest.setDisableGZipContent(true);
-//                            }
-//                        });
-
-                // WITH THIS....
-
-//                MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
-//                        .setRootUrl("https://android-app-backend.appspot.com/_ah/api/");
-
-                // where android-app-backend corresponds to your own Project ID created in section 2.2.
-
-                myApiService = builder.build();
-            }
-
-            context = params[0];
-            //String name = params[0].second;
-
-            try {
-                return myApiService.retrieveJoke().execute().getData();
-            } catch (IOException e) {
-                return e.getMessage();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-            Log.i(TAG, "onPostExecute: " + result);
-
-            Toast.makeText(context, result, Toast.LENGTH_LONG).show();
-        }
+        Intent intent = new Intent(getBaseContext(), DisplayJokeActivity.class);
+        // packages the joke as an intent extra
+        intent.putExtra(DisplayJokeActivity.EXTRA_JOKE_STRING, jokeString);
+        // launches the activity from the Android library
+        startActivity(intent);
     }
+
 }
