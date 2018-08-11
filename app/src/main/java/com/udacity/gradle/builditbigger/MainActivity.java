@@ -31,12 +31,10 @@ import java.io.IOException;
 // I apologize, Max G. is correct when he says that connected tests are required.
 // Sounds good. Thanks for the info. I actually had used the CountDownLatch method to do my test, so maybe I'll have to change it up to use IdlingResources instead. I could get the test to run with CountdownLatch if the emulator was running, but it just would hang if in a regular JUnit test. Thanks for the feedback
 
-
-// TODO: Step 5: Add a Paid Flavor
+// COMPLETED: Step 5: Add a Paid Flavor
 // Project contains paid/free flavors. The paid flavor has no ads and no unnecessary dependencies.
 // Add free and paid product flavors to your app. Remove the ad (and any dependencies you can) from the paid flavor.
-
-// TODO: Ads are required in the free version.
+// Ads are required in the free version.
 
 public class MainActivity extends AppCompatActivity implements EndpointsAsyncTask.EndpointsAsyncTaskListener {
 
