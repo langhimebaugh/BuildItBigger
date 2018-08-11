@@ -24,7 +24,8 @@ import java.io.IOException;
 
 // TODO: Step 4: Add Functional Tests
 // Project contains connected tests to verify that the AsyncTask is indeed loading jokes.
-// Add code to test that your Async task successfully retrieves a non-empty string. For a refresher on setting up Android tests, check out demo 4.09.
+// Add code to test that your Async task successfully retrieves a non-empty string.
+// For a refresher on setting up Android tests, check out demo 4.09.
 
 // All you need to do is to implement an Espresso Idling Resources test in order to verify that the AsyncTask is loading jokes.
 // To answer your question, I've seen many projects succeed in what you are doing. They use a CountDown Latch (since Espresso Idling Resources are made for connected Android Tests) and implement a callback to notify the unit test when the call has been made, or they simply use code similar to :new myAsyncTask().execute().get(); which just will halt until the async task is finished. You can probably argue for a long while which test is "better" but they both work and they both get the job done for this use case.
