@@ -34,6 +34,10 @@ public class EndpointsAsyncTaskTest implements EndpointsAsyncTask.EndpointsAsync
 
         // Not Empty
         Assert.assertNotEquals("",result);
+
+        // No Error has occurred
+        // Will throw error if cannot connect to Endpoint and test will fail
+        Assert.assertFalse(result.contains("Error"));
     }
 
     // This doesn't work with the test.
